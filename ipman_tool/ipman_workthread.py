@@ -1,7 +1,7 @@
 from ipman_tool.SR_cutover_tool import SR_cutover_tool,SR_cutover_check_tool
 
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-import ipman_tool.serialize_config
+
 class ServiceHelper(QThread):
     update_str = pyqtSignal(str)
 
@@ -13,20 +13,20 @@ class ServiceHelper(QThread):
         self.save_path = save_path
         self.target_port = target_port
         self.target_lag = target_lag
-        if vlan_last is not None:
+        if vlan_last is not None and str(vlan_last).strip() != "":
             self.vlan_last = str(vlan_last).split(",")
         else:
-            self.vlan_last = vlan_last
+            self.vlan_last = None
 
     def run(self):
         self.update_str.emit("现在开始进行业务分析以及脚本生成！")
         if self.target_port is not None:
-            print(1)
+
             srct = SR_cutover_tool(self.target_port, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path, self.target_lag, self.vlan_last)
             srct.get_target_olt_sap_and_write()
             self.update_str.emit("业务分析以及脚本完成！")
         else:
-            print(2)
+
             srct = SR_cutover_tool(None, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path,
                                    self.target_lag, None)
             srct.get_all_olt_sap_and_write()
@@ -63,3 +63,4 @@ class ServiceCheckHelper(QThread):
         scct = SR_cutover_check_tool(self.sw_file, self.save_path, "config.bin")
         scct.get_all_jk_service()
         self.update_str.emit("业务分析和脚本生成完毕！")
+
