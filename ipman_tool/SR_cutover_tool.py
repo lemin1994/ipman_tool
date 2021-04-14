@@ -1,10 +1,13 @@
-from ipman_tool.al_sr_extractor import AL_sr_extractor,AL_sr_extractor_v2
-from ipman_tool.sw_extractor import  SW_extractor
+from ipman_tool.al_sr_extractor import AL_sr_extractor, AL_sr_extractor_v2
+from ipman_tool.sw_extractor import SW_extractor
 
 import time
 import logging
 import pickle
 import pandas as pd
+
+
+# import ipman_tool.serialize_config
 
 def isIpV4AddrLegal(ipStr):
     if str(ipStr).find("/") != -1:
@@ -30,8 +33,12 @@ def isIpV4AddrLegal(ipStr):
             return False
     return True
 
+
 class SR_cutover_tool(object):
     def __init__(self, target_port, sw_file, sr_files, save_path, target_lag, vlan_last=None, ptn_file=None):
+
+        self.bng_01 = None
+        self.bng_02 = None
 
         self.target_port = target_port
         self.sw_extractor = SW_extractor(sw_file)
@@ -56,6 +63,17 @@ class SR_cutover_tool(object):
                 if vlan not in self.ptn_vlan:
                     self.ptn_vlan.append(vlan)
 
+    def set_cutover_after_bngs(self, bngs):
+        """
+        :param bngs:[BNG01:PORT, BNG02:PORT]
+        :return:
+        """
+        assert len(bngs) == 2
+        self.bng_01_port = str(bngs[0]).split(":")[1]
+
+        self.bng_02 = str(bngs[1]).split(":")[0]
+        self.bng_02_port = str(bngs[1]).split(":")[1]
+
     def get_olt_jk_vlans(self, target_port):
         vlans = [int(v) for v in self.sw_extractor.eth_trunk_vlan[self.sw_extractor.port_eth_trunk[target_port]]]
         target_vlans = []
@@ -70,22 +88,83 @@ class SR_cutover_tool(object):
                 target_vlans.append(vlan)
         return target_vlans
 
-    def get_target_olt_sap_and_write(self):
+    def get_target_olt_sap_and_write(self, hdv=None):
 
         targetPorts_vlans = self.get_olt_jk_vlans(self.target_port)
 
         # 处理 SR01
         sr01_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_1.sr_name]
         sr01_sap = self.get_lag_sap(self.al_sr_extractor_1.sap_dict, sr01_lag, targetPorts_vlans)
-        self.write_excel(sr01_sap, self.al_sr_extractor_1.sr_name)
-        self.write_script(sr01_sap, self.al_sr_extractor_1.sr_name, sr01_lag, target_lag=self.target_lag)
+
+        # self.write_excel(sr01_sap, self.al_sr_extractor_1.sr_name)
+        # self.write_script(sr01_sap, self.al_sr_extractor_1.sr_name, sr01_lag, target_lag=self.target_lag)
+
         # 处理SR02
         sr02_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_2.sr_name]
         sr02_sap = self.get_lag_sap(self.al_sr_extractor_2.sap_dict, sr02_lag, targetPorts_vlans)
-        sr02_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
+        # sr02_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
 
-        self.write_excel(sr02_sap, self.al_sr_extractor_2.sr_name)
-        self.write_script(sr02_sap, self.al_sr_extractor_2.sr_name, sr02_lag, target_lag=self.target_lag)
+        # self.write_excel(sr02_sap, self.al_sr_extractor_2.sr_name)
+        # self.write_script(sr02_sap, self.al_sr_extractor_2.sr_name, sr02_lag, target_lag=self.target_lag)
+
+        target_vprn_sap = self.get_target_vprn_sap(sr01_sap, sr02_sap)
+        if hdv is not None:
+            self.write_target_vpn_script(hdv, target_vprn_sap)
+
+    # def write_vprn_script(self, target_vprn_sap, bng_dev, ):
+    def get_target_vprn_sap(self, sr01_sap, sr02_sap):
+        target_vprn_sap = dict()
+        for sap in sr01_sap.keys():
+            if sr01_sap[sap]["interface"] is not None:
+                target_vprn_sap[sap.split(":")[-1]] = sr01_sap[sap]
+
+        for sap in sr02_sap.keys():
+            if sr02_sap[sap]["interface"] is not None and (sap.split(":")[-1] not in target_vprn_sap.keys()):
+                target_vprn_sap[sap.split(":")[-1]] = sr02_sap[sap]
+        return target_vprn_sap
+
+    def write_target_vpn_script(self, hdh, target_sap, type="HW"):
+        target_output_script = open("vprn.txt", "w")
+
+        if type.lower() == "hw":
+            # 根据物理口查询到对应的逻辑口
+            eth_port = hdh.port_eth_trunk[hdh.target_port]
+
+            can_use_hw_sap = dict()
+            vrid = None
+            for hw_sap in hdh.eth_trunk_port_dict.keys():
+                if hw_sap.startswith("Eth-Trunk" + eth_port):
+                    if hw_sap.endswith(".20"):
+                        vrid = hdh.eth_trunk_port_dict[hw_sap]["vrid"]
+                    can_use_hw_sap[hw_sap] = hdh.eth_trunk_port_dict[hw_sap]
+
+            for sap in target_sap.keys():
+                # 查看是否有对应vpn实例的局数据
+                if target_sap[sap]["rd_num"] in hdh.rd_vpn.keys():
+                    # 若有 查看是否有接口接入过该VPN实例
+                    # print(hdh.eth_trunk_port_dict.keys())
+                    need_eth = None
+                    for can_use_sap in can_use_hw_sap.keys():
+                        if can_use_hw_sap[can_use_sap]["vpn_instance"] == hdh.rd_vpn[target_sap[sap]["rd_num"]]:
+                            need_eth = can_use_sap
+                            break
+
+                if need_eth is not None:
+                    print(sap + "可以割接去" + need_eth)
+                    svlan = sap.split(".")[0]
+                    cvlan = sap.split(".")[1]
+                    target_output_script.write("interface " + need_eth + "\n")
+                    gateway = target_sap[sap]["gateway_address"].split("/")[0]
+                    mask = target_sap[sap]["gateway_address"].split("/")[1]
+                    target_output_script.write(" ip address " + gateway + " " + mask + "\n")
+                    target_output_script.write(" qinq termination pe-vid " + svlan + " ce-vid " + cvlan + "\n")
+                    target_output_script.write(" commit \n")
+                    target_output_script.write("\n")
+                    target_output_script.write("\n")
+                    target_output_script.write("\n")
+                else:
+                    print(hdh.rd_vpn[target_sap[sap]["rd_num"]])
+                    print(sap + "需要新建接口")
 
     def get_all_olt_sap_and_write(self):
         # 处理 SR01
@@ -120,22 +199,22 @@ class SR_cutover_tool(object):
             for sap in sap_dict.keys():
 
                 # print(sap)
-                if (lag_vlan + ".") in sap:
+                if (lag_vlan + ".") in sap and not sap.endswith(".0"):
                     target_dict[sap] = sap_dict[sap]
         return target_dict
-    
-    def get_ptn_sap(self,sap_dict, lag):
+
+    def get_ptn_sap(self, sap_dict, lag):
         target_dict = dict()
         for sap in sap_dict.keys():
             if (lag + ":") in str(sap) and str(sap).endswith(".0"):
-                target_dict[sap] =sap_dict[sap]
+                target_dict[sap] = sap_dict[sap]
         return target_dict
 
     def get_all_olt_sap(self, sap_dict, lag):
         target_dict = dict()
         for sap in sap_dict.keys():
             if (lag + ":") in str(sap) and not str(sap).endswith(".0"):
-                target_dict[sap] =sap_dict[sap]
+                target_dict[sap] = sap_dict[sap]
 
         return target_dict
 
@@ -147,7 +226,7 @@ class SR_cutover_tool(object):
                 print(target_lag)
                 for sap in sap_dict.keys():
                     if target_lag in str(sap) and str(sap).endswith(".0"):
-                        target_dict[sap] =sap_dict[sap]
+                        target_dict[sap] = sap_dict[sap]
             return target_dict
         else:
             for sap in sap_dict.keys():
@@ -184,9 +263,9 @@ class SR_cutover_tool(object):
             df.loc[count, "ip"] = ip_str
             df.loc[count, "业务类型"] = type
             count += 1
-        df.to_excel(self.save_path + "/" + sr_name + "_"+ str(int(time.time())) +".xlsx")
+        df.to_excel(self.save_path + "/" + sr_name + "_" + str(int(time.time())) + ".xlsx")
 
-    def write_script(self, sap_dict, sr_name, source_lag,target_lag="50"):
+    def write_script(self, sap_dict, sr_name, source_lag, target_lag="50"):
         # 生成割接前的脚本
         source_file = open(self.save_path + "/" + sr_name + "_割接前.txt", "w")
 
@@ -246,7 +325,7 @@ class SR_cutover_tool(object):
         cutover_file = open(self.save_path + "/" + sr_name + "_割接后.txt", "w")
         count_2 = 1
         ies_group_interface_re = ""
-        vprn_group_interface_re=""
+        vprn_group_interface_re = ""
         for sap in sap_dict.keys():
             if count_2 % 10 == 0:
                 cutover_file.write("================  这里刷一次脚本，避免刷的脚本太多卡顿！ =============\n")
@@ -260,34 +339,59 @@ class SR_cutover_tool(object):
                     cutover_file.write(sap_dict[sap]["subscriber_interface"] + "\n")
 
                     if ies_group_interface_re.strip() == "" and "-" in str(sap_dict[sap]["group_interface"]):
-                        ies_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("-BF", "").replace("\"","")
+                        ies_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("-BF",
+                                                                                                          "").replace(
+                            "\"", "")
                     elif vprn_group_interface_re.strip() == "" and "_" in str(sap_dict[sap]["group_interface"]):
-                        vprn_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("_BF", "").replace("\"","")
-                        # print(vprn_group_interface_re)
+                        vprn_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("_BF",
+                                                                                                           "").replace(
+                            "\"", "")
+                        print(vprn_group_interface_re)
 
                     if "-" in str(sap_dict[sap]["group_interface"]).split()[1]:
-                        cutover_file.write(str(sap_dict[sap]["group_interface"]).replace(ies_group_interface_re, "JK-LAG-" + str(target_lag)) + "\n")
+                        cutover_file.write(str(sap_dict[sap]["group_interface"]).replace(ies_group_interface_re,
+                                                                                         "JK-LAG-" + str(
+                                                                                             target_lag)) + "\n")
                     elif "_" in str(sap_dict[sap]["group_interface"]):
-                        print("ok")
+
                         cutover_file.write(str(sap_dict[sap]["group_interface"]).replace(vprn_group_interface_re,
                                                                                          "JK_LAG_" + str(
                                                                                              target_lag)) + "\n")
 
-                    cutover_file.write(str(sap_dict[sap]["content"]).replace(source_lag, "lag-"+str(target_lag)))
+                    cutover_file.write(str(sap_dict[sap]["content"]).replace(source_lag, "lag-" + str(target_lag)))
                     cutover_file.write("\n")
-            
 
         cutover_file.write("\n")
+
+
+sct = SR_cutover_tool("11/0/2", "H:\AutoJiaoBen\信源的配置文件\session.log(XY-SW01)",
+                      ["H:\AutoJiaoBen\信源的配置文件\session.log(KXC-SR01)", "H:\AutoJiaoBen\信源的配置文件\session.log(XY-SR01)"],
+                      None, None)
+
+config_file = "H:\AutoJiaoBen\设备配置\session(CC-BNG01).log"
+target_port = "1/0/2"
+
+from ipman_tool.hw_dev_handler import HwDevHandler
+
+hdh = HwDevHandler()
+hdh.set_config_file(config_file)
+hdh.extract_important_information()
+hdh.set_target_port(target_port)
+port_eth_dict = hdh.port_eth_trunk
+sct.get_target_olt_sap_and_write(hdh)
+
 
 class SR_cutover_check_tool(object):
     def __init__(self, sw_file, save_path, config_bin=None):
 
         self.sw_extractor = SW_extractor(sw_file)
         self.save_path = save_path
-
-        al_sr01 = list(self.sw_extractor.sr_lag.keys())[0]
-        al_sr02 = list(self.sw_extractor.sr_lag.keys())[1]
-
+        if len(self.sw_extractor.sr_lag.keys()) > 0:
+            al_sr01 = list(self.sw_extractor.sr_lag.keys())[0]
+            al_sr02 = list(self.sw_extractor.sr_lag.keys())[1]
+        if len(self.sw_extractor.bng_lag.keys()) > 0:
+            al_bng01 = list(self.sw_extractor.bng_lag.keys())[0]
+            al_bng02 = list(self.sw_extractor.bng_lag.keys())[1]
         if config_bin is not None:
             with open(config_bin, "rb") as cd:
                 config_dict = pickle.load(cd)
@@ -295,22 +399,37 @@ class SR_cutover_check_tool(object):
             with open("config.bin", "rb") as cd:
                 config_dict = pickle.load(cd)
 
-        self.al_sr_extractor_1 = AL_sr_extractor_v2(al_sr01, config_dict[al_sr01])
-        self.al_sr_extractor_2 = AL_sr_extractor_v2(al_sr02, config_dict[al_sr02])
+        if len(self.sw_extractor.sr_lag.keys()) > 0:
+            self.al_sr_extractor_1 = AL_sr_extractor_v2(al_sr01, config_dict[al_sr01])
+            self.al_sr_extractor_2 = AL_sr_extractor_v2(al_sr02, config_dict[al_sr02])
+
+        if len(self.sw_extractor.bng_lag.keys()) > 0:
+            self.al_bng_extractor_1 = AL_sr_extractor_v2(al_bng01, config_dict[al_bng01])
+            self.al_bng_extractor_2 = AL_sr_extractor_v2(al_bng02, config_dict[al_bng02])
 
     def get_all_jk_service(self):
-        # 处理 SR01
-        sr01_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_1.sr_name]
-        sr01_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_1.sap_dict, sr01_lag)
-        self.write_excel(sr01_ptn_sap, self.al_sr_extractor_1.sr_name + "_ptn")
-        sr01_olt_sap = self.get_all_olt_sap(self.al_sr_extractor_1.sap_dict, sr01_lag)
-        self.write_excel(sr01_olt_sap, self.al_sr_extractor_1.sr_name + "_olt")
-        # 处理 SR02
-        sr02_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_2.sr_name]
-        sr02_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
-        self.write_excel(sr02_ptn_sap, self.al_sr_extractor_2.sr_name + "_ptn")
-        sr02_olt_sap = self.get_all_olt_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
-        self.write_excel(sr02_olt_sap, self.al_sr_extractor_2.sr_name + "_olt")
+        if len(self.sw_extractor.sr_lag.keys()) > 0:
+            # 处理 SR01
+            sr01_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_1.sr_name]
+            sr01_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_1.sap_dict, sr01_lag)
+            self.write_excel(sr01_ptn_sap, self.al_sr_extractor_1.sr_name + "_ptn")
+            sr01_olt_sap = self.get_all_olt_sap(self.al_sr_extractor_1.sap_dict, sr01_lag)
+            self.write_excel(sr01_olt_sap, self.al_sr_extractor_1.sr_name + "_olt")
+            # 处理 SR02
+            sr02_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_2.sr_name]
+            sr02_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
+            self.write_excel(sr02_ptn_sap, self.al_sr_extractor_2.sr_name + "_ptn")
+            sr02_olt_sap = self.get_all_olt_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
+            self.write_excel(sr02_olt_sap, self.al_sr_extractor_2.sr_name + "_olt")
+        if len(self.sw_extractor.bng_lag.keys()) > 0:
+            # 处理 bng01
+            bng01_lag = self.sw_extractor.bng_lag[self.al_bng_extractor_1.sr_name]
+            bng01_ptn_sap = self.get_ptn_sap(self.al_bng_extractor_1.sap_dict, bng01_lag)
+            self.write_excel(bng01_ptn_sap, self.al_bng_extractor_1.sr_name + "_ptn")
+            # 处理 bng01
+            bng02_lag = self.sw_extractor.bng_lag[self.al_bng_extractor_2.sr_name]
+            bng02_ptn_sap = self.get_ptn_sap(self.al_bng_extractor_2.sap_dict, bng02_lag)
+            self.write_excel(bng02_ptn_sap, self.al_bng_extractor_2.sr_name + "_ptn")
 
     def get_ptn_sap(self, sap_dict, lag):
         target_dict = dict()
@@ -323,7 +442,7 @@ class SR_cutover_check_tool(object):
         target_dict = dict()
         for sap in sap_dict.keys():
             if (lag + ":") in str(sap) and not str(sap).endswith(".0"):
-                target_dict[sap] =sap_dict[sap]
+                target_dict[sap] = sap_dict[sap]
 
         return target_dict
 
@@ -356,7 +475,7 @@ class SR_cutover_check_tool(object):
             df.loc[count, "ip"] = ip_str
             df.loc[count, "业务类型"] = type
             count += 1
-        df.to_excel(self.save_path + "/" + sr_name + "_"+ str(int(time.time())) +".xlsx")
+        df.to_excel(self.save_path + "/" + sr_name + "_" + str(int(time.time())) + ".xlsx")
 
 
 
