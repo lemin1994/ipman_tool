@@ -24,6 +24,7 @@ class ServiceHelper(QThread):
 
             srct = SR_cutover_tool(self.target_port, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path, self.target_lag, self.vlan_last)
             srct.get_target_olt_sap_and_write()
+
             self.update_str.emit("业务分析以及脚本完成！")
         else:
 

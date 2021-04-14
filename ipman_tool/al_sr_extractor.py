@@ -118,7 +118,6 @@ class AL_sr_extractor(object):
             if start_flag and cmd_line.startswith(tab + "exit"):
                 break
 
-
             # 设置获取
         self.sap_dict = sap_dict
         file.close()

@@ -83,7 +83,7 @@ class SR_cutover_tool(object):
         sr02_lag = self.sw_extractor.sr_lag[self.al_sr_extractor_2.sr_name]
         sr02_sap = self.get_lag_sap(self.al_sr_extractor_2.sap_dict, sr02_lag, targetPorts_vlans)
         sr02_ptn_sap = self.get_ptn_sap(self.al_sr_extractor_2.sap_dict, sr02_lag)
-        
+
         self.write_excel(sr02_sap, self.al_sr_extractor_2.sr_name)
         self.write_script(sr02_sap, self.al_sr_extractor_2.sr_name, sr02_lag, target_lag=self.target_lag)
 
@@ -263,7 +263,7 @@ class SR_cutover_tool(object):
                         ies_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("-BF", "").replace("\"","")
                     elif vprn_group_interface_re.strip() == "" and "_" in str(sap_dict[sap]["group_interface"]):
                         vprn_group_interface_re = str(sap_dict[sap]["group_interface"]).split()[1].replace("_BF", "").replace("\"","")
-                        print(vprn_group_interface_re)
+                        # print(vprn_group_interface_re)
 
                     if "-" in str(sap_dict[sap]["group_interface"]).split()[1]:
                         cutover_file.write(str(sap_dict[sap]["group_interface"]).replace(ies_group_interface_re, "JK-LAG-" + str(target_lag)) + "\n")

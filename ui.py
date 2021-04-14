@@ -252,7 +252,7 @@ class Ui_Dialog(QMainWindow):
         self.textBrowser_4.setObjectName("textBrowser_4")
         reg = '[0-9][/][0-9][/][0-9]'
         regExp = QRegExp(reg)
-        reg2 = 'GDGZ-MS-IPMAN-BNG[0-9]{2}-[a-zA-Z]+-[HW|AL]{2}'
+        reg2 = 'GDGZ-MS-IPMAN-BNG[0-9]{2}-[a-zA-Z]+[0-9]?-[HW|AL]{2}'
         regExp2 = QRegExp(reg2)
         self.lineEdit.setValidator(QRegExpValidator(regExp, self.tab2))
         self.lineEdit_3.setValidator(QRegExpValidator(regExp, self.tab2))
