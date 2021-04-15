@@ -6,7 +6,7 @@ from PyQt5.QtCore import pyqtSlot, QRegExp
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QButtonGroup
 
-from ipman_tool.ipman_workthread import ServiceHelper,PTNServiceHelper, ServiceCheckHelper
+from ipman_tool.ipman_workthread import ServiceHelper,PTNServiceHelper, ServiceCheckHelper, GetBngHelper
 
 class Ui_Dialog(QMainWindow):
     def setupUi(self, Dialog):
@@ -411,11 +411,6 @@ class Ui_Dialog(QMainWindow):
             self.pushButton_24.setGeometry(QtCore.QRect(420, 300, 261, 61))
             self.textBrowser_24.setGeometry(QtCore.QRect(180, 380, 761, 111))
 
-
-    @pyqtSlot()
-    def on_click_button(self):
-        print(1)
-
     # 选择SW文件
     @pyqtSlot()
     def on_click_button_2(self):
@@ -504,14 +499,63 @@ class Ui_Dialog(QMainWindow):
     def handleDisplay(self, info):
         self.textBrowser_12.append(info)
 
+
+    """第二个页面的点击事件"""
+    @pyqtSlot()
+    def on_click_button(self):
+        if self.sw_2_file is not None:
+            self.textBrowser.setText(self.sw_2_file)
+        sw_2_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选取文件", os.getcwd(),
+                                                             "All Files(*);;Text Files(*.txt)")
+        if sw_2_file.strip() != "":
+            self.textBrowser.setText(sw_2_file)
+        self.sw_2_file = sw_2_file
+
+        self.ptnsh2 = GetBngHelper(self)
+        self.ptnsh2.update_str.connect(self.handleDisplay_2)
+        self.ptnsh2.update_str2.connect(self.handleDisplay_3)
+        self.ptnsh2.update_str3.connect(self.handleDisplay_4)
+        self.ptnsh2.update_str4.connect(self.handleDisplay_5)
+        self.ptnsh2.update_str5.connect(self.handleDisplay_6)
+
+    def handleDisplay_2(self, info):
+        self.lineEdit_2.setText(info)
+
+    def handleDisplay_3(self, info):
+        self.lineEdit.setText(info)
+
+    def handleDisplay_4(self, info):
+        self.lineEdit_4.setText(info)
+
+    def handleDisplay_5(self, info):
+        self.lineEdit_3.setText(info)
+
+    def handleDisplay_6(self, info):
+        self.textBrowser_24.append(info)
+
+
     @pyqtSlot()
     def on_click_button_3(self):
-        print(1)
-    @pyqtSlot()
-    def on_click_button_6(self):
-        print(1)
+        if self.bng_file is not None:
+            self.textBrowser.setText(self.bng_file)
+        bng_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选取文件", os.getcwd(),
+                                                             "All Files(*);;Text Files(*.txt)")
+        if bng_file.strip() != "":
+            self.textBrowser_3.setText(bng_file)
+        self.bng_file = bng_file
+
     @pyqtSlot()
     def on_click_button_7(self):
+        if self.bng_2_file is not None:
+            self.textBrowser.setText(self.bng_2_file)
+        bng_2_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选取文件", os.getcwd(),
+                                                            "All Files(*);;Text Files(*.txt)")
+        if bng_2_file.strip() != "":
+            self.textBrowser_3.setText(bng_2_file)
+        self.bng_2_file = bng_2_file
+
+    @pyqtSlot()
+    def on_click_button_24(self):
         print(1)
 
 
@@ -547,15 +591,7 @@ class Ui_Dialog(QMainWindow):
     def handleDisplay_tab3(self, info):
         self.textBrowser_8.append(info)
 
-    @pyqtSlot()
-    def on_click_button_24(self):
-        print(1)
-    @pyqtSlot()
-    def on_click_button_25(self):
-        print(1)
-    @pyqtSlot()
-    def on_click_button_26(self):
-        print(1)
+
 
 
 

@@ -7,9 +7,10 @@ class GeneralCutTool(object):
 
         :return: 如果有，则反馈一个数组 为（BNG01:端口，BNG02:端口）
         """
-        result_bngs = None
+        result_code = 0
+        self.result_bngs = None
 
-        return result_bngs
+        return self.result_bngs
 
     def set_cutover_after_bngs(self, bngs):
         """

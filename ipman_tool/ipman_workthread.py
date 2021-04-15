@@ -1,4 +1,6 @@
 from ipman_tool.SR_cutover_tool import SR_cutover_tool,SR_cutover_check_tool
+from ipman_tool.general_cutover_tool import GeneralCutTool
+import numpy as np
 
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 
@@ -65,3 +67,22 @@ class ServiceCheckHelper(QThread):
         scct.get_all_jk_service()
         self.update_str.emit("业务分析和脚本生成完毕！")
 
+class GetBngHelper(QThread):
+    update_str = pyqtSignal(str)
+    update_str2 = pyqtSignal(str)
+    update_str3 = pyqtSignal(str)
+    update_str4 = pyqtSignal(str)
+    update_str5 = pyqtSignal(str)
+
+    def __init__(self):
+        super(QThread, self).__init__()
+
+    def run(self) -> None:
+        gc = GeneralCutTool(self)
+        result_bngs = gc.get_over_bngs(self)
+        result_bngs_str = ''.join(result_bngs)
+        self.update_str.emit(result_bngs[0])
+        self.update_str2.emit(result_bngs[1])
+        self.update_str3.emit(result_bngs[2])
+        self.update_str4.emit(result_bngs[3])
+        self.update_str5.emit(result_bngs_str)
