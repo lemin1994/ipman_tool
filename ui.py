@@ -40,6 +40,11 @@ class Ui_Dialog(QMainWindow):
         self.save_file_path = None
         self.ptn_service_file = None
 
+        # 第二个页面的变量
+        self.sw_2_file = None
+        self.bng_file = None
+        self.bng_2_file = None
+
         # 第三个页面的变量
         self.pre_file = None
         self.after_file = None
@@ -60,16 +65,16 @@ class Ui_Dialog(QMainWindow):
 
         # 选择 SR02 文件
         self.pushButton_9 = QtWidgets.QPushButton(self.tab1)
-        self.pushButton_9.setGeometry(QtCore.QRect(410, 170, 141, 28))
+        self.pushButton_9.setGeometry(QtCore.QRect(930, 120, 141, 28))
         self.pushButton_9.setObjectName("pushButton_9")
         
         
         self.target_lag_editor = QtWidgets.QTextEdit(self.tab1)
-        self.target_lag_editor.setGeometry(QtCore.QRect(140, 70, 251, 31))
+        self.target_lag_editor.setGeometry(QtCore.QRect(140, 75, 256, 31))
         self.target_lag_editor.setObjectName("target_lag_editor")
 
         self.pushButton_10 = QtWidgets.QPushButton(self.tab1)
-        self.pushButton_10.setGeometry(QtCore.QRect(370, 340, 261, 61))
+        self.pushButton_10.setGeometry(QtCore.QRect(420, 340, 261, 61))
         self.pushButton_10.setObjectName("pushButton_10")
 
         self.label_10 = QtWidgets.QLabel(self.tab1)
@@ -77,12 +82,16 @@ class Ui_Dialog(QMainWindow):
         self.label_10.setObjectName("label_10")
 
         self.label_11 = QtWidgets.QLabel(self.tab1)
-        self.label_11.setGeometry(QtCore.QRect(50, 180, 72, 15))
+        self.label_11.setGeometry(QtCore.QRect(570, 130, 72, 15))
         self.label_11.setObjectName("label_11")
 
         self.label_12 = QtWidgets.QLabel(self.tab1)
-        self.label_12.setGeometry(QtCore.QRect(20, 270, 101, 20))
+        self.label_12.setGeometry(QtCore.QRect(50, 230, 101, 20))
         self.label_12.setObjectName("label_12")
+
+        self.label_18 = QtWidgets.QLabel(self.tab1)
+        self.label_18.setGeometry(QtCore.QRect(170, 280, 101, 20))
+        self.label_18.setObjectName("label_18")
 
         # SR01
         self.pushButton_11 = QtWidgets.QPushButton(self.tab1)
@@ -91,11 +100,11 @@ class Ui_Dialog(QMainWindow):
 
         # 保存文件路径
         self.pushButton_12 = QtWidgets.QPushButton(self.tab1)
-        self.pushButton_12.setGeometry(QtCore.QRect(410, 270, 141, 28))
+        self.pushButton_12.setGeometry(QtCore.QRect(410, 220, 141, 28))
         self.pushButton_12.setObjectName("pushButton_12")
 
         self.label_13 = QtWidgets.QLabel(self.tab1)
-        self.label_13.setGeometry(QtCore.QRect(50, 230, 72, 15))
+        self.label_13.setGeometry(QtCore.QRect(50, 180, 72, 15))
         self.label_13.setObjectName("label_13")
 
         
@@ -108,7 +117,7 @@ class Ui_Dialog(QMainWindow):
         self.label_15.setObjectName("label_15")
 
         self.pushButton_14 = QtWidgets.QPushButton(self.tab1)
-        self.pushButton_14.setGeometry(QtCore.QRect(790, 70, 141, 28))
+        self.pushButton_14.setGeometry(QtCore.QRect(790, 75, 141, 28))
         self.pushButton_14.setObjectName("pushButton_14")
 
         self.label_16 = QtWidgets.QLabel(self.tab1)
@@ -122,7 +131,7 @@ class Ui_Dialog(QMainWindow):
 
         # PTN文件选择框
         self.textBrowser_11 = QtWidgets.QTextBrowser(self.tab1)
-        self.textBrowser_11.setGeometry(QtCore.QRect(510, 70, 261, 31))
+        self.textBrowser_11.setGeometry(QtCore.QRect(510, 75, 261, 31))
         self.textBrowser_11.setObjectName("textBrowser_11")
 
         # SR01
@@ -132,27 +141,35 @@ class Ui_Dialog(QMainWindow):
 
         # SR02
         self.textBrowser_10 = QtWidgets.QTextBrowser(self.tab1)
-        self.textBrowser_10.setGeometry(QtCore.QRect(140, 170, 256, 31))
+        self.textBrowser_10.setGeometry(QtCore.QRect(660, 120, 256, 31))
         self.textBrowser_10.setObjectName("textBrowser_10")
 
         # vlan尾数
         self.textedit_vlan = QtWidgets.QTextEdit(self.tab1)
-        self.textedit_vlan.setGeometry(QtCore.QRect(140, 220, 256, 31))
+        self.textedit_vlan.setGeometry(QtCore.QRect(140, 170, 256, 31))
         self.textedit_vlan.setObjectName("textBrowser_13")
 
         # 最后的回显框
         self.textBrowser_12 = QtWidgets.QTextBrowser(self.tab1)
-        self.textBrowser_12.setGeometry(QtCore.QRect(130, 440, 761, 111))
+        self.textBrowser_12.setGeometry(QtCore.QRect(180, 420, 761, 111))
         self.textBrowser_12.setObjectName("textBrowser_12")
 
         # 保存文件的路径
         self.textBrowser_9 = QtWidgets.QTextBrowser(self.tab1)
-        self.textBrowser_9.setGeometry(QtCore.QRect(140, 270, 256, 31))
+        self.textBrowser_9.setGeometry(QtCore.QRect(140, 220, 256, 31))
         self.textBrowser_9.setObjectName("textBrowser_9")
 
         self.sw_port_editor = QtWidgets.QTextEdit(self.tab1)
-        self.sw_port_editor.setGeometry(QtCore.QRect(510, 70, 261, 31))
+        self.sw_port_editor.setGeometry(QtCore.QRect(510, 75, 261, 31))
         self.sw_port_editor.setObjectName("sw_port_editor")
+
+        self.textBrowser_15 = QtWidgets.QTextBrowser(self.tab1)
+        self.textBrowser_15.setGeometry(QtCore.QRect(260, 270, 256, 31))
+        self.textBrowser_15.setObjectName("textBrowser_15")
+
+        self.pushButton_15 = QtWidgets.QPushButton(self.tab1)
+        self.pushButton_15.setGeometry(QtCore.QRect(530, 270, 141, 28))
+        self.pushButton_15.setObjectName("pushButton_15")
         
         self.radioButton = QtWidgets.QRadioButton(self.tab1)
         self.radioButton.setGeometry(QtCore.QRect(600, 30, 120, 16))
@@ -162,15 +179,28 @@ class Ui_Dialog(QMainWindow):
         self.radioButton_2.setObjectName("radioButton_2")
         self.radioButton.setText("框式OLT集客")
         self.radioButton_2.setText("PTN集客")
+        self.radioButton_7 = QtWidgets.QRadioButton(self.tab1)
+        self.radioButton_7.setGeometry(QtCore.QRect(50, 280, 101, 20))
+        self.radioButton_7.setObjectName("radioButton_7")
+        self.radioButton_7.setText("割接VPRN业务")
+        self.qbg_3 = QButtonGroup()
+        self.qbg_3.addButton(self.radioButton, 1)
+        self.qbg_3.addButton(self.radioButton_2, 2)
         self.radioButton.setChecked(True)
         self.radioButton.toggled.connect(lambda: self.radioButtonStart(self.radioButton))
         self.radioButton_2.toggled.connect(lambda: self.radioButtonStart2(self.radioButton_2))
+        self.radioButton_7.toggled.connect(lambda: self.radioButtonStart7(self.radioButton_7))
+
 
         self.label_16.setVisible(True)
         self.sw_port_editor.setVisible(True)
         self.label_14.setHidden(True)
         self.textBrowser_11.setHidden(True)
         self.pushButton_14.setHidden(True)
+
+        self.label_18.setHidden(True)
+        self.textBrowser_15.setHidden(True)
+        self.pushButton_15.setHidden(True)
 
         self.pushButton_2.clicked.connect(self.on_click_button_2)
 
@@ -194,19 +224,19 @@ class Ui_Dialog(QMainWindow):
         self.label_3.setGeometry(QtCore.QRect(50, 120, 51, 16))
         self.label_3.setObjectName("label_3")
         self.label_5 = QtWidgets.QLabel(self.tab2)
-        self.label_5.setGeometry(QtCore.QRect(50, 180, 51, 16))
+        self.label_5.setGeometry(QtCore.QRect(50, 170, 51, 16))
         self.label_5.setObjectName("label_5")
         self.label_4 = QtWidgets.QLabel(self.tab2)
-        self.label_4.setGeometry(QtCore.QRect(410, 121, 81, 16))
+        self.label_4.setGeometry(QtCore.QRect(410, 120, 81, 16))
         self.label_4.setObjectName("label_4")
         self.lineEdit = QtWidgets.QLineEdit(self.tab2)
         self.lineEdit.setGeometry(QtCore.QRect(490, 110, 161, 31))
         self.lineEdit.setObjectName("lineEdit")
         self.label_7 = QtWidgets.QLabel(self.tab2)
-        self.label_7.setGeometry(QtCore.QRect(410, 181, 81, 16))
+        self.label_7.setGeometry(QtCore.QRect(410, 170, 81, 16))
         self.label_7.setObjectName("label_7")
         self.lineEdit_3 = QtWidgets.QLineEdit(self.tab2)
-        self.lineEdit_3.setGeometry(QtCore.QRect(490, 170, 161, 31))
+        self.lineEdit_3.setGeometry(QtCore.QRect(490, 160, 161, 31))
         self.lineEdit_3.setObjectName("lineEdit_3")
         self.textBrowser_24 = QtWidgets.QTextBrowser(self.tab2)
         self.textBrowser_24.setGeometry(QtCore.QRect(180, 380, 761, 111))
@@ -218,13 +248,13 @@ class Ui_Dialog(QMainWindow):
         self.radioButton_3.setGeometry(QtCore.QRect(350, 120, 61, 16))
         self.radioButton_3.setObjectName("radioButton_3")
         self.radioButton_4 = QtWidgets.QRadioButton(self.tab2)
-        self.radioButton_4.setGeometry(QtCore.QRect(350, 180, 51, 16))
+        self.radioButton_4.setGeometry(QtCore.QRect(350, 170, 51, 16))
         self.radioButton_4.setObjectName("radioButton_4")
         self.lineEdit_2 = QtWidgets.QLineEdit(self.tab2)
-        self.lineEdit_2.setGeometry(QtCore.QRect(100, 110, 231, 31))
+        self.lineEdit_2.setGeometry(QtCore.QRect(100, 110, 235, 31))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit_4 = QtWidgets.QLineEdit(self.tab2)
-        self.lineEdit_4.setGeometry(QtCore.QRect(100, 170, 231, 31))
+        self.lineEdit_4.setGeometry(QtCore.QRect(100, 160, 235, 31))
         self.lineEdit_4.setObjectName("lineEdit_4")
         self.radioButton_5 = QtWidgets.QRadioButton(self.tab2)
         self.radioButton_5.setGeometry(QtCore.QRect(50, 230, 89, 16))
@@ -347,6 +377,8 @@ class Ui_Dialog(QMainWindow):
         self.label_15.setText(_translate("Dialog", "SR01："))
         self.pushButton_14.setText(_translate("Dialog", "选择PTN集客清单"))
         self.label_16.setText(_translate("Dialog", "SW端口："))
+        self.label_18.setText(_translate("Dialog", "BNG01及端口："))
+        self.pushButton_15.setText(_translate("Dialog", "选择配置文件"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1), _translate("Dialog", "业务分析"))
         self.label.setText(_translate("Dialog", "SW："))
         self.pushButton.setText(_translate("Dialog", "选择SW文件"))
@@ -388,6 +420,16 @@ class Ui_Dialog(QMainWindow):
             self.label_14.setVisible(True)
             self.textBrowser_11.setVisible(True)
             self.pushButton_14.setVisible(True)
+
+    def radioButtonStart7(self, rbn):
+        if rbn.isChecked() == True:
+            self.label_18.setVisible(True)
+            self.textBrowser_15.setVisible(True)
+            self.pushButton_15.setVisible(True)
+        else:
+            self.label_18.setHidden(True)
+            self.textBrowser_15.setHidden(True)
+            self.pushButton_15.setHidden(True)
 
     def radioButtonStart6(self, rbn):
         if rbn.isChecked() == True:
