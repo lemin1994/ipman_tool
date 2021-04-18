@@ -90,19 +90,5 @@ class IPManDbHandler(object):
 
         return sap_dict
 
-# import Config as config
-# import pickle
-#
-# with open(config.config_cache_file, "rb") as cd:
-#     dev_all_dict = pickle.load(cd)
-#
-# iph = IPManDbHandler()
-# conn = iph.get_db_conn(config.db_connect_file)
-# for dev in dev_all_dict.keys():
-#     if "AL" not in dev:
-#         continue
-#
-#     ase = AL_sr_extractor(None, dev)
-#     ase.extract_sr_cutover_information()
-#     iph.add_sap_into_db(ase.sap_dict, conn, dev)
+
 
