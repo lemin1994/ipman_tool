@@ -460,7 +460,7 @@ class Ui_Dialog(QMainWindow):
     @pyqtSlot()
     def on_click_button_10(self):
         if self.radioButton.isChecked():
-            print("olt")
+            print("olt使用")
             if self.sw_file is None is None:
                 QMessageBox.information(self, "提示信息", "缺少必要的配置文件！！")
             elif self.target_lag_editor.toPlainText() == "":
