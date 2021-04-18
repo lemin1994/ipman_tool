@@ -186,14 +186,14 @@ class Ui_Dialog(QMainWindow):
         self.qbg_3 = QButtonGroup()
         self.qbg_3.addButton(self.radioButton, 1)
         self.qbg_3.addButton(self.radioButton_2, 2)
-        self.radioButton.setChecked(True)
+        #self.radioButton.setChecked(True)
         self.radioButton.toggled.connect(lambda: self.radioButtonStart(self.radioButton))
         self.radioButton_2.toggled.connect(lambda: self.radioButtonStart2(self.radioButton_2))
         self.radioButton_7.toggled.connect(lambda: self.radioButtonStart7(self.radioButton_7))
 
 
-        self.label_16.setVisible(True)
-        self.sw_port_editor.setVisible(True)
+        self.label_16.setHidden(True)
+        self.sw_port_editor.setHidden(True)
         self.label_14.setHidden(True)
         self.textBrowser_11.setHidden(True)
         self.pushButton_14.setHidden(True)
