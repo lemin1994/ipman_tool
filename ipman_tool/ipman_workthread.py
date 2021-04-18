@@ -22,15 +22,20 @@ class ServiceHelper(QThread):
 
     def run(self):
         self.update_str.emit("现在开始进行业务分析以及脚本生成！")
+        sr_file_list = []
+        if self.sr01_file is None or self.sr02_file is None:
+            sr_file_list = None
+        else:
+            sr_file_list = [self.sr01_file, self.sr02_file]
         if self.target_port is not None:
 
-            srct = SR_cutover_tool(self.target_port, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path, self.target_lag, self.vlan_last)
+            srct = SR_cutover_tool(self.target_port, self.sw_file, sr_file_list, self.save_path, self.target_lag, self.vlan_last)
             srct.get_target_olt_sap_and_write()
 
             self.update_str.emit("业务分析以及脚本完成！")
         else:
 
-            srct = SR_cutover_tool(None, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path,
+            srct = SR_cutover_tool(None, self.sw_file, sr_file_list, self.save_path,
                                    self.target_lag, None)
             srct.get_all_olt_sap_and_write()
             self.update_str.emit("业务分析完成！")
@@ -49,7 +54,12 @@ class PTNServiceHelper(QThread):
 
     def run(self):
         self.update_str.emit("现在开始进行PTN集客业务分析和脚本生成！")
-        srct = SR_cutover_tool(None, self.sw_file, [self.sr01_file, self.sr02_file], self.save_path, self.target_lag, None, ptn_file=self.ptn_file)
+        sr_file_list = []
+        if self.sr01_file is None or self.sr02_file is None:
+            sr_file_list = None
+        else:
+            sr_file_list = [self.sr01_file, self.sr02_file]
+        srct = SR_cutover_tool(None, self.sw_file, sr_file_list, self.save_path, self.target_lag, None, ptn_file=self.ptn_file)
         srct.get_target_ptn_output()
         self.update_str.emit("业务分析和脚本生成完毕！")
 
@@ -63,7 +73,8 @@ class ServiceCheckHelper(QThread):
 
     def run(self) -> None:
         self.update_str.emit("现在开始进行PTN集客业务分析和脚本生成！")
-        scct = SR_cutover_check_tool(self.sw_file, self.save_path, "config.bin")
+        scct = SR_cutover_check_tool(self.sw_file, self.save_path)
+
         scct.get_all_jk_service()
         self.update_str.emit("业务分析和脚本生成完毕！")
 

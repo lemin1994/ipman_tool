@@ -461,7 +461,7 @@ class Ui_Dialog(QMainWindow):
     def on_click_button_10(self):
         if self.radioButton.isChecked():
             print("olt")
-            if self.sw_file is None or self.sr01_file is None or self.sr02_file is None:
+            if self.sw_file is None is None:
                 QMessageBox.information(self, "提示信息", "缺少必要的配置文件！！")
             elif self.target_lag_editor.toPlainText() == "":
                 QMessageBox.information(self, "提示信息", "缺少必要的条件信息！！")
@@ -472,15 +472,24 @@ class Ui_Dialog(QMainWindow):
                     sw_port = self.sw_port_editor.toPlainText()
                 if self.textedit_vlan.toPlainText().strip() == "":
                     vlan_last = self.textedit_vlan.toPlainText()
+
+                if self.sr01_file is not None and self.sr01_file.strip() == "":
+                    self.sr01_file = None
+                if self.sr01_file is not None and self.sr02_file.strip() == "":
+                    self.sr02_file = None
                 self.sh = ServiceHelper(self.sw_file, self.sr01_file, self.sr02_file, self.save_file_path,sw_port, self.target_lag_editor.toPlainText().strip(),
                                         vlan_last)
                 self.sh.update_str.connect(self.handleDisplay)
                 self.sh.start()
         else:
             print("PTN")
-            if self.sw_file is None or self.sr01_file is None or self.sr02_file is None:
+            if self.sw_file is None:
                 QMessageBox.information(self, "提示信息", "缺少必要的配置文件！！")
             else:
+                if self.sr01_file is not None and self.sr01_file.strip() == "":
+                    self.sr01_file = None
+                if self.sr01_file is not None and self.sr02_file.strip() == "":
+                    self.sr02_file = None
                 self.ptnsh = PTNServiceHelper(self.sw_file, self.sr01_file, self.sr02_file, self.save_file_path,
                                               self.ptn_service_file, self.target_lag_editor.toPlainText().strip())
                 self.ptnsh.update_str.connect(self.handleDisplay)

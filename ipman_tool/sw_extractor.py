@@ -5,7 +5,8 @@ class SW_extractor(object):
         self.port_eth_trunk = dict()
         self.eth_trunk_vlan = dict()
         self.sr_lag = dict()
-        
+        self.bng_lag = dict()
+
         port = None
         eth_trunk_port = None
 
@@ -14,7 +15,7 @@ class SW_extractor(object):
             # ============= 做好端口和虚拟端口的映射 ============= #
             if "interface GigabitEthernet" in config and config.startswith("interface"):
                 port = config.split("GigabitEthernet")[-1].strip()
-            elif "interface XGigabitEthernet" in config and config.startswith("interface"):
+            elif "interface XGigabitEthernet4" in config and config.startswith("interface"):
                 port = config.split("XGigabitEthernet")[-1].strip()
 
 
@@ -50,6 +51,14 @@ class SW_extractor(object):
                 lag = "lag-" + info.split("-")[-1].replace("\n", "")
                 if sr_name not in self.sr_lag.keys():
                     self.sr_lag[sr_name] = lag
+            # BNG 和 LAG
+            if "BNG" in config and "lag" in config.lower():
+                prefix = "GDGZ-MS-IPMAN-"
+                info = config.split("GDGZ-MS-IPMAN-")[-1]
+                bng_name = "GDGZ-MS-IPMAN-" + "-".join(info.split("-")[0:2]) + "-AL"
+                lag = "lag-" + info.split("-")[-1].replace("\n", "")
+                if bng_name not in self.bng_lag.keys():
+                    self.bng_lag[bng_name] = lag
             # 结束
             if "#" in config:
                 port = None
