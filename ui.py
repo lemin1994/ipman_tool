@@ -124,6 +124,22 @@ class Ui_Dialog(QMainWindow):
         self.label_16.setGeometry(QtCore.QRect(450, 80, 51, 16))
         self.label_16.setObjectName("label_16")
 
+        self.label_19 = QtWidgets.QLabel(self.tab1)
+        self.label_19.setGeometry(QtCore.QRect(700, 280, 25, 16))
+        self.label_19.setObjectName("label_19")
+
+        self.lineEdit_5 = QtWidgets.QLineEdit(self.tab1)
+        self.lineEdit_5.setGeometry(QtCore.QRect(725, 270, 190, 31))
+        self.lineEdit_5.setObjectName("lineEdit_5")
+
+        self.label_20 = QtWidgets.QLabel(self.tab1)
+        self.label_20.setGeometry(QtCore.QRect(925, 280, 27, 16))
+        self.label_20.setObjectName("label_20")
+
+        self.lineEdit_6 = QtWidgets.QLineEdit(self.tab1)
+        self.lineEdit_6.setGeometry(QtCore.QRect(960, 270, 100, 31))
+        self.lineEdit_6.setObjectName("lineEdit_6")
+
         # 目标SW选择
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.tab1)
         self.textBrowser_2.setGeometry(QtCore.QRect(140, 30, 256, 31))
@@ -191,6 +207,12 @@ class Ui_Dialog(QMainWindow):
         self.radioButton_2.toggled.connect(lambda: self.radioButtonStart2(self.radioButton_2))
         self.radioButton_7.toggled.connect(lambda: self.radioButtonStart7(self.radioButton_7))
 
+        reg = '[0-9][/][0-9][/][0-9]'
+        regExp = QRegExp(reg)
+        reg2 = 'GDGZ-MS-IPMAN-BNG[0-9]{2}-[a-zA-Z]+[0-9]?-[HW|AL]{2}'
+        regExp2 = QRegExp(reg2)
+        self.lineEdit_6.setValidator(QRegExpValidator(regExp, self.tab1))
+        self.lineEdit_5.setValidator(QRegExpValidator(regExp2, self.tab1))
 
         self.label_16.setHidden(True)
         self.sw_port_editor.setHidden(True)
@@ -201,6 +223,10 @@ class Ui_Dialog(QMainWindow):
         self.label_18.setHidden(True)
         self.textBrowser_15.setHidden(True)
         self.pushButton_15.setHidden(True)
+        self.label_19.setHidden(True)
+        self.lineEdit_5.setHidden(True)
+        self.label_20.setHidden(True)
+        self.lineEdit_6.setHidden(True)
 
         self.pushButton_2.clicked.connect(self.on_click_button_2)
 
@@ -348,6 +374,7 @@ class Ui_Dialog(QMainWindow):
         self.textBrowser_8.setGeometry(QtCore.QRect(180, 310, 721, 192))
         self.textBrowser_8.setObjectName("textBrowser_8")
 
+
         self.pushButton_4.clicked.connect(self.on_click_button_4)
         self.pushButton_8.clicked.connect(self.on_click_button_8)
         self.pushButton_13.clicked.connect(self.on_click_button_13)
@@ -370,6 +397,8 @@ class Ui_Dialog(QMainWindow):
         self.label_10.setText(_translate("Dialog", "目标lag："))
         self.label_11.setText(_translate("Dialog", "SR02："))
         self.label_12.setText(_translate("Dialog", "保存文件路径："))
+        self.label_19.setText(_translate("Dialog", "BNG:"))
+        self.label_20.setText(_translate("Dialog", "端口："))
         self.pushButton_11.setText(_translate("Dialog", "选择SR01配置文件"))
         self.pushButton_12.setText(_translate("Dialog", "选择保存文件路径"))
         self.label_13.setText(_translate("Dialog", "VLAN尾数："))
@@ -426,10 +455,18 @@ class Ui_Dialog(QMainWindow):
             self.label_18.setVisible(True)
             self.textBrowser_15.setVisible(True)
             self.pushButton_15.setVisible(True)
+            self.label_19.setVisible(True)
+            self.lineEdit_5.setVisible(True)
+            self.label_20.setVisible(True)
+            self.lineEdit_6.setVisible(True)
         else:
             self.label_18.setHidden(True)
             self.textBrowser_15.setHidden(True)
             self.pushButton_15.setHidden(True)
+            self.label_19.setHidden(True)
+            self.lineEdit_5.setHidden(True)
+            self.label_20.setHidden(True)
+            self.lineEdit_6.setHidden(True)
 
     def radioButtonStart6(self, rbn):
         if rbn.isChecked() == True:
